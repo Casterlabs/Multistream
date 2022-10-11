@@ -55,3 +55,16 @@ A list of custom commands to run when the stream starts, video is piped into `st
 
 Here's an example of how to stream to Caffeine via SRT:  
 `"ffmpeg -hide_banner -v error -f nut -i pipe:0 -c copy -f mpegts SRT_URL_HERE"`
+
+### Full Example Config
+
+```json
+{
+    "debug": false,
+    "disableColoredConsole": false,
+    "showPreview": false,
+    "recordToFile": true,
+    "rtmpTargets": ["rtmp://live-dfw.twitch.tv/app/STREAM_KEY", "rtmp://livepush.trovo.live/live/STREAM_KEY"],
+    "customTargets": []
+}
+```
