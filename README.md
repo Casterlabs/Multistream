@@ -21,7 +21,7 @@ This program will just copy the audio/video information directly to the targets,
 
 ## Configuring
 
-The program auto reloads the config when you click save, just make sure to restart your stream if it's active.
+The program auto reloads the config when you click save, just make sure to restart your stream if it's active. If the config file doesn't exist a default one will be created.
 
 ### debug
 
