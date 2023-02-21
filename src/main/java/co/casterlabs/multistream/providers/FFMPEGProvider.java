@@ -9,16 +9,15 @@ import java.util.function.Supplier;
 
 import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.commons.functional.tuples.Pair;
-import lombok.AllArgsConstructor;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
-@AllArgsConstructor
 public class FFMPEGProvider implements Supplier<Pair<OutputStream, Closeable>> {
     private String command;
     private FastLogger logger;
 
     public FFMPEGProvider(String command) {
         this.logger = new FastLogger("FFMPEG Target: " + command.hashCode());
+        this.command = command;
     }
 
     @Override
