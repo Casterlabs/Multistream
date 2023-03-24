@@ -26,6 +26,7 @@ public class Listener implements Closeable {
     public final FastLogger logger = new FastLogger("Listener");
 
     private void doLoop() {
+        FastLogger ffmpegLogger = this.logger.createChild("FFMpeg");
         boolean isFirstListen = true;
 
         while (this.running) {
@@ -33,29 +34,27 @@ public class Listener implements Closeable {
 
             try {
                 Process listener = new ProcessBuilder()
-                    .command(
-                        "ffmpeg",
-                        "-hide_banner",
-//                        "-v", "error",
-
-                        "-f", "flv",
-                        "-listen", "1",
-                        "-rw_timeout", "10",
-                        "-i", "rtmp://localhost:1935",
-                        "-c", "copy",
-                        "-f", "nut", "pipe:1"
-                    )
-                    .redirectInput(Redirect.PIPE)
-                    .redirectOutput(Redirect.PIPE)
-                    .redirectError(Redirect.PIPE)
-                    .start();
+                        .command(
+                                "ffmpeg",
+                                "-hide_banner",
+//                                "-v", "error",
+                                "-f", "flv",
+                                "-listen", "1",
+                                "-rw_timeout", "10",
+                                "-i", "rtmp://0.0.0.0:1935/live",
+                                "-c", "copy",
+                                "-f", "nut", "pipe:1")
+                        .redirectInput(Redirect.PIPE)
+                        .redirectOutput(Redirect.PIPE)
+                        .redirectError(Redirect.PIPE)
+                        .start();
 
                 // Read the FFMPEG log and write it to our console using FastLoggingFramework.
                 AsyncTask.create(() -> {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(listener.getErrorStream()))) {
                         String line;
                         while ((line = reader.readLine()) != null) {
-                            this.logger.debug("[FFMPEG] " + line);
+                            ffmpegLogger.debug("[FFMPEG] " + line);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -65,7 +64,7 @@ public class Listener implements Closeable {
                 this.logger.debug("Proc started.");
                 if (isFirstListen) {
                     isFirstListen = false;
-                    this.logger.info("Listening on rtmp://localhost:1935, waiting for connection.");
+                    this.logger.info("Listening on rtmp://127.0.0.1:1935/live, waiting for connection.");
                 }
 
                 boolean isFirstPacket = true;
@@ -79,7 +78,8 @@ public class Listener implements Closeable {
 
                         for (Supplier<Pair<OutputStream, Closeable>> provider : this.providers) {
                             Pair<OutputStream, Closeable> result = provider.get();
-                            if (result == null) continue;
+                            if (result == null)
+                                continue;
 
                             if (result.a() != null) {
                                 this.targets.add(result.a());
@@ -103,7 +103,7 @@ public class Listener implements Closeable {
 
                 this.logger.info("Stream ended.");
             } catch (IOException e) {
-//                e.printStackTrace();
+                this.logger.debug(e);
             } finally {
                 this.doCleanup();
                 this.logger.debug("Proc closed.");
@@ -120,7 +120,8 @@ public class Listener implements Closeable {
     }
 
     public void start() throws IOException {
-        if (this.running) return;
+        if (this.running)
+            return;
 
         this.running = true;
         AsyncTask.createNonDaemon(this::doLoop);
@@ -128,7 +129,8 @@ public class Listener implements Closeable {
 
     @Override
     public void close() {
-        if (!this.running) return;
+        if (!this.running)
+            return;
 
         this.running = false;
         this.doCleanup();
@@ -137,7 +139,8 @@ public class Listener implements Closeable {
     private static void safeClose(Closeable c) {
         try {
             c.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
     }
 
 }
