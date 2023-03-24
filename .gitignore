@@ -21,3 +21,4 @@
 config.json
 recordings/
 dist/
+ffmpeg.exe
