@@ -41,6 +41,7 @@ public class Listener implements Closeable {
                                 "-f", "flv",
                                 "-listen", "1",
                                 "-rw_timeout", "10",
+                                "-timeout", "30",
                                 "-i", "rtmp://0.0.0.0:1935/live",
                                 "-c", "copy",
                                 "-f", "nut", "pipe:1")
@@ -48,6 +49,8 @@ public class Listener implements Closeable {
                         .redirectOutput(Redirect.PIPE)
                         .redirectError(Redirect.PIPE)
                         .start();
+
+                this.resources.add(listener::destroy);
 
                 // Read the FFMPEG log and write it to our console using FastLoggingFramework.
                 AsyncTask.create(() -> {
@@ -101,7 +104,9 @@ public class Listener implements Closeable {
                     }
                 }
 
-                this.logger.info("Stream ended.");
+                if (!isFirstPacket) { // We haven't gotten information yet.
+                    this.logger.info("Stream ended.");
+                }
             } catch (IOException e) {
                 this.logger.debug(e);
             } finally {

@@ -35,7 +35,7 @@ public class Multistream {
                 }
             }
         }
-            .start();
+                .start();
 
         reload();
         start();
@@ -47,11 +47,10 @@ public class Multistream {
         if (!configFile.exists()) {
             logger.info("Config file doesn't exist, creating a new file.");
             Files.writeString(
-                configFile.toPath(),
-                Rson.DEFAULT
-                    .toJson(new Config())
-                    .toString(true)
-            );
+                    configFile.toPath(),
+                    Rson.DEFAULT
+                            .toJson(new Config())
+                            .toString(true));
             return;
         }
 
@@ -82,14 +81,16 @@ public class Multistream {
 
             // rtmpTargets
             for (String target : config.getRtmpTargets()) {
-                if (target.startsWith("#")) continue;
+                if (target.startsWith("#"))
+                    continue;
 
                 listener.providers.add(new RTMPProvider(target));
             }
 
             // customTargets
             for (String target : config.getCustomTargets()) {
-                if (target.startsWith("#")) continue;
+                if (target.startsWith("#"))
+                    continue;
 
                 listener.providers.add(new FFMPEGProvider(target));
             }
@@ -101,7 +102,6 @@ public class Multistream {
     }
 
     private static void start() throws IOException, InterruptedException {
-        Runtime.getRuntime().addShutdownHook(new Thread(listener::close));
         listener.start();
     }
 
