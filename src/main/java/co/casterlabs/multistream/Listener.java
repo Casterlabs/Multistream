@@ -63,26 +63,16 @@ public class Listener implements Closeable {
                             ffmpegLogger.debug("[FFMPEG] " + line);
 
                             if (line.contains("Unexpected stream")) {
-                                if (Multistream.getConfig().getListener().getStreamKey() == null
-                                        || Multistream.getConfig().getListener().getStreamKey().isEmpty()) {
-                                    this.logger.warn("No stream key configured. Ignoring...");
-                                    continue;
-                                }
-
                                 String keyUsed = line.substring(
                                         line.indexOf("Unexpected stream") + "Unexpected stream".length(),
                                         line.lastIndexOf(',')).trim();
 
-                                if (Multistream.getConfig().getListener().getStreamKey().equals(keyUsed)) {
-                                    this.logger.info("Authentication passed!");
-                                } else {
-                                    this.logger.warn("Invalid stream key: %s", keyUsed);
-                                    this.restart(); // Boot them.
+                                if (!this.checkStreamKey(keyUsed)) {
+                                    this.restart(); // Boot them off.
                                 }
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
                     }
                 });
 
@@ -137,6 +127,22 @@ public class Listener implements Closeable {
                 this.doCleanup();
                 this.logger.debug("Proc closed.");
             }
+        }
+    }
+
+    private boolean checkStreamKey(String keyUsed) {
+        if (Multistream.getConfig().getListener().getStreamKey() == null
+                || Multistream.getConfig().getListener().getStreamKey().isEmpty()) {
+            this.logger.warn("No stream key configured. Ignoring and starting the stream...");
+            return true;
+        }
+
+        if (Multistream.getConfig().getListener().getStreamKey().equals(keyUsed)) {
+            this.logger.info("Stream key authentication passed! Starting the stream...");
+            return true;
+        } else {
+            this.logger.warn("Invalid stream key used: %s. Disconnecting...", keyUsed);
+            return false;
         }
     }
 
