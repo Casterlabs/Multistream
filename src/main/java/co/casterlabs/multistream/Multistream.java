@@ -11,6 +11,7 @@ import co.casterlabs.multistream.providers.PreviewProvider;
 import co.casterlabs.multistream.providers.RTMPProvider;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.serialization.JsonParseException;
+import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -20,6 +21,8 @@ public class Multistream {
 
     private static final FastLogger logger = new FastLogger();
     private static final Listener listener = new Listener();
+
+    private static @Getter Config config;
 
     public static void main(String[] args) throws Exception {
 //        ConsoleUtil.summonConsoleWindow();
@@ -58,7 +61,7 @@ public class Multistream {
         listener.providers.clear();
 
         try {
-            Config config = Rson.DEFAULT.fromJson(Files.readString(configFile.toPath()), Config.class);
+            config = Rson.DEFAULT.fromJson(Files.readString(configFile.toPath()), Config.class);
 
             // disableColoredConsole
             FastLoggingFramework.setColorEnabled(!config.isDisableColoredConsole());
@@ -80,7 +83,7 @@ public class Multistream {
             }
 
             // rtmpTargets
-            for (String target : config.getRtmpTargets()) {
+            for (String target : config.getTargets().getRtmpTargets()) {
                 if (target.startsWith("#"))
                     continue;
 
@@ -88,7 +91,7 @@ public class Multistream {
             }
 
             // customTargets
-            for (String target : config.getCustomTargets()) {
+            for (String target : config.getTargets().getCustomTargets()) {
                 if (target.startsWith("#"))
                     continue;
 

@@ -18,7 +18,33 @@ public class Config {
     private boolean showPreview = false;
     private boolean recordToFile = false;
 
-    private List<String> rtmpTargets = new ArrayList<>();
-    private List<String> customTargets = new ArrayList<>();
+    private Listener listener;
+    private Targets targets;
+
+    @Getter
+    @ToString
+    @JsonClass(exposeAll = true)
+    public class Listener {
+        private String streamKey = ""; // Set to blank to disable.
+        private int port = 1935;
+
+        public String getRtmpPath() {
+            if (this.streamKey == null || this.streamKey.isEmpty()) {
+                return "/live";
+            } else {
+                return "/live/" + this.streamKey;
+            }
+        }
+
+    }
+
+    @Getter
+    @ToString
+    @JsonClass(exposeAll = true)
+    public class Targets {
+        private List<String> rtmpTargets = new ArrayList<>();
+        private List<String> customTargets = new ArrayList<>();
+
+    }
 
 }

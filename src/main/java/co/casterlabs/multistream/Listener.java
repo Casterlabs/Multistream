@@ -42,7 +42,11 @@ public class Listener implements Closeable {
                                 "-listen", "1",
                                 "-rw_timeout", "10",
                                 "-timeout", "30",
-                                "-i", "rtmp://0.0.0.0:1935/live",
+                                "-i",
+                                String.format(
+                                        "rtmp://0.0.0.0:%d%s",
+                                        Multistream.getConfig().getListener().getPort(),
+                                        Multistream.getConfig().getListener().getRtmpPath()),
                                 "-c", "copy",
                                 "-f", "nut", "pipe:1")
                         .redirectInput(Redirect.PIPE)
@@ -67,7 +71,10 @@ public class Listener implements Closeable {
                 this.logger.debug("Proc started.");
                 if (isFirstListen) {
                     isFirstListen = false;
-                    this.logger.info("Listening on rtmp://127.0.0.1:1935/live, waiting for connection.");
+                    this.logger.info(
+                            "Listening on rtmp://127.0.0.1:%d%s, waiting for connection.",
+                            Multistream.getConfig().getListener().getPort(),
+                            Multistream.getConfig().getListener().getRtmpPath());
                 }
 
                 boolean isFirstPacket = true;
