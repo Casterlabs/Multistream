@@ -28,20 +28,22 @@ public class RTMPProvider implements Supplier<Pair<OutputStream, Closeable>> {
     public Pair<OutputStream, Closeable> get() {
         try {
             Process ffmpeg = new ProcessBuilder()
-                .command(
-                    "ffmpeg",
-                    "-hide_banner",
+                    .command(
+                            "ffmpeg",
+                            "-hide_banner",
 //                    "-v", "error",
 
-                    "-i", "pipe:0",
-                    "-c", "copy",
-                    "-f", "flv",
-                    this.url
-                )
-                .redirectInput(Redirect.PIPE)
-                .redirectOutput(Redirect.INHERIT)
-                .redirectError(Redirect.PIPE)
-                .start();
+                            "-fflags", "nobuffer",
+                            "-flags", "lowdelay",
+
+                            "-i", "pipe:0",
+                            "-c", "copy",
+                            "-f", "flv",
+                            this.url)
+                    .redirectInput(Redirect.PIPE)
+                    .redirectOutput(Redirect.INHERIT)
+                    .redirectError(Redirect.PIPE)
+                    .start();
 
             // Read the FFMPEG log and write it to our console using FastLoggingFramework.
             AsyncTask.create(() -> {
@@ -50,7 +52,8 @@ public class RTMPProvider implements Supplier<Pair<OutputStream, Closeable>> {
                     while ((line = reader.readLine()) != null) {
                         this.logger.debug(line);
                     }
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                }
             });
 
             return new Pair<>(ffmpeg.getOutputStream(), ffmpeg::destroy);

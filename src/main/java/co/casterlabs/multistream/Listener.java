@@ -39,12 +39,16 @@ public class Listener implements Closeable {
                                 "ffmpeg",
                                 "-hide_banner",
 //                                "-v", "debug",
+
+                                "-fflags", "nobuffer",
+                                "-flags", "lowdelay",
                                 "-f", "flv",
                                 "-listen", "1",
 //                                "-rw_timeout", "10",
 //                                "-timeout", "30",
                                 "-rtmp_app", "live",
                                 "-i", "rtmp://0.0.0.0:" + Multistream.getConfig().getListener().getPort(),
+
                                 "-c", "copy",
                                 "-f", "nut", "pipe:1")
                         .redirectInput(Redirect.PIPE)
@@ -72,7 +76,8 @@ public class Listener implements Closeable {
                                 }
                             }
                         }
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
                 });
 
                 this.logger.debug("Proc started.");
