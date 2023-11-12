@@ -1,6 +1,6 @@
 package co.casterlabs.multistream;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import co.casterlabs.rakurai.json.annotating.JsonClass;
@@ -24,7 +24,7 @@ public class Config {
     @Getter
     @ToString
     @JsonClass(exposeAll = true)
-    public class Listener {
+    public static class Listener {
         private String streamKey = ""; // Set to blank to disable.
         private int port = 1935;
 
@@ -41,9 +41,9 @@ public class Config {
     @Getter
     @ToString
     @JsonClass(exposeAll = true)
-    public class Targets {
-        private List<String> rtmpTargets = new ArrayList<>();
-        private List<String> customTargets = new ArrayList<>();
+    public static class Targets {
+        private List<String> rtmpTargets = Collections.emptyList();
+        private List<String> customTargets = Collections.emptyList();
 
     }
 
