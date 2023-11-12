@@ -18,8 +18,8 @@ public class Config {
     private boolean showPreview = false;
     private boolean recordToFile = false;
 
-    private Listener listener;
-    private Targets targets;
+    private Listener listener = new Listener();
+    private Targets targets = new Targets();
 
     @Getter
     @ToString
