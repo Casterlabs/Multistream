@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.commons.functional.tuples.Pair;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class FFMPEGProvider implements Supplier<Pair<OutputStream, Closeable>> {
     private String command;
@@ -42,14 +43,12 @@ public class FFMPEGProvider implements Supplier<Pair<OutputStream, Closeable>> {
                     while ((line = reader.readLine()) != null) {
                         this.logger.debug(line);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                } catch (IOException ignored) {}
             });
 
             return new Pair<>(proc.getOutputStream(), proc::destroy);
         } catch (IOException e) {
-            e.printStackTrace();
+            FastLogger.logStatic(LogLevel.DEBUG, e);
             return null;
         }
     }

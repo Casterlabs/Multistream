@@ -72,8 +72,7 @@ public class Listener implements Closeable {
                                 }
                             }
                         }
-                    } catch (IOException e) {
-                    }
+                    } catch (IOException ignored) {}
                 });
 
                 this.logger.debug("Proc started.");
