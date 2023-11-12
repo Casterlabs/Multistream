@@ -28,14 +28,6 @@ public class Config {
         private String streamKey = ""; // Set to blank to disable.
         private int port = 1935;
 
-        public String getRtmpPath() {
-            if (this.streamKey == null || this.streamKey.isEmpty()) {
-                return "/live";
-            } else {
-                return "/live/" + this.streamKey;
-            }
-        }
-
     }
 
     @Getter

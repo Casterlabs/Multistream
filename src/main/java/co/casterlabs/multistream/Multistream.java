@@ -42,6 +42,8 @@ public class Multistream {
 
         reload();
 
+        listener.start();
+
         logger.info("Want to support the project? You can do so via our Ko-fi! https://ko-fi.com/Casterlabs");
     }
 
@@ -99,8 +101,7 @@ public class Multistream {
 
 //            logger.debug("Using config: %s", config);
 
-            listener.close();
-            listener.start();
+            listener.restart();
         } catch (JsonParseException e) {
             logger.severe("Unable to parse config file, is it malformed?\n%s", e);
         }

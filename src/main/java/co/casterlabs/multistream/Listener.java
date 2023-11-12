@@ -22,6 +22,7 @@ public class Listener implements Closeable {
 
     private List<Closeable> resources = new LinkedList<>();
     private List<OutputStream> targets = new LinkedList<>();
+    private Process listener;
 
     public final FastLogger logger = new FastLogger("Listener");
 
@@ -33,20 +34,17 @@ public class Listener implements Closeable {
             this.logger.debug("Proc starting.");
 
             try {
-                Process listener = new ProcessBuilder()
+                this.listener = new ProcessBuilder()
                         .command(
                                 "ffmpeg",
                                 "-hide_banner",
-//                                "-v", "error",
+//                                "-v", "debug",
                                 "-f", "flv",
                                 "-listen", "1",
-                                "-rw_timeout", "10",
-                                "-timeout", "30",
-                                "-i",
-                                String.format(
-                                        "rtmp://0.0.0.0:%d%s",
-                                        Multistream.getConfig().getListener().getPort(),
-                                        Multistream.getConfig().getListener().getRtmpPath()),
+//                                "-rw_timeout", "10",
+//                                "-timeout", "30",
+                                "-rtmp_app", "live",
+                                "-i", "rtmp://0.0.0.0:" + Multistream.getConfig().getListener().getPort(),
                                 "-c", "copy",
                                 "-f", "nut", "pipe:1")
                         .redirectInput(Redirect.PIPE)
@@ -54,14 +52,34 @@ public class Listener implements Closeable {
                         .redirectError(Redirect.PIPE)
                         .start();
 
-                this.resources.add(listener::destroy);
+                this.resources.add(this.listener::destroy);
 
                 // Read the FFMPEG log and write it to our console using FastLoggingFramework.
                 AsyncTask.create(() -> {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(listener.getErrorStream()))) {
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(this.listener.getErrorStream()))) {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             ffmpegLogger.debug("[FFMPEG] " + line);
+
+                            if (line.contains("Unexpected stream")) {
+                                if (Multistream.getConfig().getListener().getStreamKey() == null
+                                        || Multistream.getConfig().getListener().getStreamKey().isEmpty()) {
+                                    this.logger.warn("No stream key configured. Ignoring...");
+                                    continue;
+                                }
+
+                                String keyUsed = line.substring(
+                                        line.indexOf("Unexpected stream") + "Unexpected stream".length(),
+                                        line.lastIndexOf(',')).trim();
+
+                                if (Multistream.getConfig().getListener().getStreamKey().equals(keyUsed)) {
+                                    this.logger.info("Authentication passed!");
+                                } else {
+                                    this.logger.warn("Invalid stream key: %s", keyUsed);
+                                    this.restart(); // Boot them.
+                                }
+                            }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -72,13 +90,12 @@ public class Listener implements Closeable {
                 if (isFirstListen) {
                     isFirstListen = false;
                     this.logger.info(
-                            "Listening on rtmp://127.0.0.1:%d%s, waiting for connection.",
-                            Multistream.getConfig().getListener().getPort(),
-                            Multistream.getConfig().getListener().getRtmpPath());
+                            "Listening on rtmp://127.0.0.1:%d/live, waiting for connection.",
+                            Multistream.getConfig().getListener().getPort());
                 }
 
                 boolean isFirstPacket = true;
-                InputStream nutStream = listener.getInputStream();
+                InputStream nutStream = this.listener.getInputStream();
 
                 byte[] buf = new byte[10 * 1024]; // 10KB
                 int read;
@@ -137,6 +154,12 @@ public class Listener implements Closeable {
 
         this.running = true;
         AsyncTask.createNonDaemon(this::doLoop);
+    }
+
+    public void restart() {
+        if (this.listener != null) {
+            this.listener.destroy();
+        }
     }
 
     @Override
