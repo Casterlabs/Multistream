@@ -1,3 +1,5 @@
+Archived as of August 8th, 2024. We now offer a [paid service](https://multistream.casterlabs.co). Forks are welcome! :)
+
 # Multistream
 
 This is a small little tool for multistreaming without a huge hassle.
